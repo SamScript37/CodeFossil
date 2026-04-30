@@ -1,0 +1,49 @@
+name: Auto Tag Version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read package version
+        id: version
+        run: |
+          VERSION=$(python - <<'PY'
+from pathlib import Path
+import re
+text = Path('codefossil/__init__.py').read_text(encoding='utf-8')
+match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', text)
+if not match:
+    raise SystemExit('Could not find __version__ in codefossil/__init__.py')
+print(match.group(1))
+PY
+)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create git tag if missing
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          TAG="v${VERSION}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists; skipping."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag "$TAG"
+          git push origin "$TAG"

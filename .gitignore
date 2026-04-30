@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*.so
+.venv/
+.env
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+*.whl
+*.tar.gz
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Project cache
+.codefossil_cache.json
