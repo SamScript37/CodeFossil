@@ -1,5 +1,7 @@
 # CodeFossil
 
+[![PyPI version](https://badge.fury.io/py/codefossil.svg?icon=si%3Apython&icon_color=%2343d7f4)](https://badge.fury.io/py/codefossil)
+
 CodeFossil is a production-ready Python CLI that scans JavaScript projects for stale npm dependencies, assigns risk scores, and optionally adds AI migration guidance for the highest-risk packages.
 
 ## What it does
