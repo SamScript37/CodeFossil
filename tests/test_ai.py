@@ -15,8 +15,10 @@ def test_generate_advice_skips_dependencies_with_cached_advice(monkeypatch) -> N
         def generate_migration_advice(self, dependency: dict[str, object]) -> str:
             raise AssertionError("provider should not be called")
 
-    monkeypatch.setattr(pipeline, "generate_advice_for_dependencies", generate_advice_for_dependencies)
-    monkeypatch.setattr("codefossil.ai.service.get_provider", lambda *_args: ExplodingProvider())
+    monkeypatch.setattr(
+        "codefossil.ai.service.get_provider",
+        lambda *_args: ExplodingProvider(),
+    )
 
     deps = [
         {
@@ -40,7 +42,9 @@ def test_analyze_project_advanced_survives_ai_provider_error_without_persisting_
         encoding="utf-8",
     )
 
-    def fake_analyze_dependency_versions(_dependency_versions: dict[str, str]) -> list[dict[str, object]]:
+    def fake_analyze_dependency_versions(
+        _dependency_versions: dict[str, str],
+    ) -> list[dict[str, object]]:
         return [
             {
                 "name": "legacy-lib",
@@ -53,8 +57,16 @@ def test_analyze_project_advanced_survives_ai_provider_error_without_persisting_
     def raise_ai_provider_error(*_args, **_kwargs):
         raise AIProviderError("provider unavailable")
 
-    monkeypatch.setattr(pipeline, "analyze_dependency_versions", fake_analyze_dependency_versions)
-    monkeypatch.setattr(pipeline, "generate_advice_for_dependencies", raise_ai_provider_error)
+    monkeypatch.setattr(
+        pipeline,
+        "analyze_dependency_versions",
+        fake_analyze_dependency_versions,
+    )
+    monkeypatch.setattr(
+        pipeline,
+        "generate_advice_for_dependencies",
+        raise_ai_provider_error,
+    )
 
     results = pipeline.analyze_project_advanced(
         tmp_path,
