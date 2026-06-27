@@ -92,7 +92,10 @@ def test_load_package_json_requires_dependency_sections(tmp_path) -> None:
     package_json = tmp_path / "package.json"
     package_json.write_text('{"name": "demo"}', encoding="utf-8")
 
-    with pytest.raises(PackageJsonError, match="must include dependencies or devDependencies"):
+    with pytest.raises(
+        PackageJsonError,
+        match="must include dependencies or devDependencies",
+    ):
         load_package_json(package_json)
 
 
@@ -121,7 +124,11 @@ def test_fetch_years_since_latest_release_uses_latest_tag_timestamp() -> None:
     )
     client = DummyClient(response)
 
-    years = fetch_years_since_latest_release(client, "left-pad", now)  # type: ignore[arg-type]
+    years = fetch_years_since_latest_release(
+        client,  # type: ignore[arg-type]
+        "left-pad",
+        now,
+    )
 
     assert client.requested_url == f"{NPM_REGISTRY_URL}/left-pad"
     assert years == pytest.approx(0.999, rel=0.01)
@@ -132,4 +139,11 @@ def test_fetch_years_since_latest_release_returns_high_risk_age_on_http_error() 
     now = datetime(2026, 1, 1, tzinfo=UTC)
     client = DummyClient(DummyResponse({}, httpx.HTTPError("registry down")))
 
-    assert fetch_years_since_latest_release(client, "missing-package", now) == 99.0  # type: ignore[arg-type]
+    assert (
+        fetch_years_since_latest_release(
+            client,  # type: ignore[arg-type]
+            "missing-package",
+            now,
+        )
+        == 99.0
+    )
