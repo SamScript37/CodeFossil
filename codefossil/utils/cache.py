@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +24,9 @@ class CacheStore:
         try:
             with self.cache_file.open("r", encoding="utf-8") as handle:
                 content = json.load(handle)
-                if isinstance(content, dict) and isinstance(content.get("entries"), dict):
+                if isinstance(content, dict) and isinstance(
+                    content.get("entries"), dict
+                ):
                     return content
         except (json.JSONDecodeError, OSError):
             pass

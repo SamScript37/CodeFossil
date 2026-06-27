@@ -29,7 +29,9 @@ def test_generate_advice_skips_dependencies_with_cached_advice(monkeypatch) -> N
         }
     ]
 
-    assert generate_advice_for_dependencies(deps, "openai", "secret-key", top_n=1) == deps
+    assert (
+        generate_advice_for_dependencies(deps, "openai", "secret-key", top_n=1) == deps
+    )
 
 
 def test_analyze_project_advanced_survives_ai_provider_error_without_persisting_api_key(

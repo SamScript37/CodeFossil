@@ -6,6 +6,9 @@ __pycache__/
 .venv/
 .env
 
+# OS
+.DS_Store
+
 # Build / packaging
 build/
 dist/

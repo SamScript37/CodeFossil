@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import hashlib
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -49,10 +49,14 @@ def save_cache(path: Path, data: dict[str, Any]) -> None:
         "project_hash": str(data.get("project_hash", "")),
         "dependencies": data.get("dependencies", {}),
     }
-    path.write_text(json.dumps(serializable, indent=2, sort_keys=True), encoding="utf-8")
+    path.write_text(
+        json.dumps(serializable, indent=2, sort_keys=True), encoding="utf-8"
+    )
 
 
-def get_cached_dependency(cache: dict[str, Any], name: str, version: str) -> dict[str, Any] | None:
+def get_cached_dependency(
+    cache: dict[str, Any], name: str, version: str
+) -> dict[str, Any] | None:
     """Retrieve cached dependency result by package name and version."""
     key = f"{name}@{version}"
     dependencies = cache.get("dependencies", {})

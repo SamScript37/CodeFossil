@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 import typer
 from rich.console import Console
@@ -24,28 +25,64 @@ def main() -> None:
 
 @app.command("scan")
 def scan_command(
-    project_path: Path = typer.Argument(
-        Path("."),
-        exists=False,
-        file_okay=False,
-        dir_okay=True,
-        help="Project directory to scan (defaults to current directory).",
-    ),
-    output_format: str = typer.Option("table", "--format", help="Output format: table, json, markdown."),
-    output: Path | None = typer.Option(None, "--output", help="Write output to a file path instead of stdout."),
-    min_risk: int = typer.Option(0, "--min-risk", help="Only show dependencies at or above this risk score."),
-    include_dev: bool = typer.Option(False, "--include-dev", help="Include devDependencies from package.json."),
-    ai_provider: str | None = typer.Option(None, "--ai-provider", help="AI provider: openai, anthropic, or groq."),
-    api_key: str | None = typer.Option(None, "--api-key", help="API key for the selected AI provider."),
-    ai_top: int = typer.Option(3, "--ai-top", help="Top N high-risk dependencies for AI advice."),
-    incremental: bool = typer.Option(False, "--incremental", help="Only analyze dependencies changed since last run."),
+    project_path: Annotated[
+        Path,
+        typer.Argument(
+            exists=False,
+            file_okay=False,
+            dir_okay=True,
+            help="Project directory to scan (defaults to current directory).",
+        ),
+    ] = Path("."),
+    output_format: Annotated[
+        str, typer.Option("--format", help="Output format: table, json, markdown.")
+    ] = "table",
+    output: Annotated[
+        Path | None,
+        typer.Option("--output", help="Write output to a file path instead of stdout."),
+    ] = None,
+    min_risk: Annotated[
+        int,
+        typer.Option(
+            "--min-risk", help="Only show dependencies at or above this risk score."
+        ),
+    ] = 0,
+    include_dev: Annotated[
+        bool,
+        typer.Option(
+            "--include-dev", help="Include devDependencies from package.json."
+        ),
+    ] = False,
+    ai_provider: Annotated[
+        str | None,
+        typer.Option("--ai-provider", help="AI provider: openai, anthropic, or groq."),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        typer.Option("--api-key", help="API key for the selected AI provider."),
+    ] = None,
+    ai_top: Annotated[
+        int,
+        typer.Option("--ai-top", help="Top N high-risk dependencies for AI advice."),
+    ] = 3,
+    incremental: Annotated[
+        bool,
+        typer.Option(
+            "--incremental", help="Only analyze dependencies changed since last run."
+        ),
+    ] = False,
 ) -> None:
     """Scan a project for stale npm dependencies and display a risk report."""
     if ai_provider and not api_key:
-        typer.echo("Warning: --ai-provider was set but --api-key is missing. Skipping AI advice.", err=True)
+        typer.echo(
+            "Warning: --ai-provider was set but --api-key is missing. Skipping AI advice.",
+            err=True,
+        )
 
     if not project_path.exists() or not project_path.is_dir():
-        console.print(f"[red]Error:[/red] Project path not found or not a directory: {project_path}")
+        console.print(
+            f"[red]Error:[/red] Project path not found or not a directory: {project_path}"
+        )
         raise typer.Exit(code=1)
 
     try:
@@ -71,27 +108,29 @@ def scan_command(
 
     format_key = output_format.lower().strip()
     if format_key not in {"table", "json", "markdown"}:
-        console.print("[red]Error:[/red] --format must be one of: table, json, markdown")
+        console.print(
+            "[red]Error:[/red] --format must be one of: table, json, markdown"
+        )
         raise typer.Exit(code=2)
 
     if format_key == "table":
         if not filtered:
             console.print("[yellow]No dependencies matched the risk criteria.[/yellow]")
             return
-        rendered = render_table(filtered)
-    elif format_key == "json":
-        rendered = to_json(filtered)
-    else:
-        rendered = to_markdown(filtered)
 
-    if output is not None:
-        output.write_text(str(rendered), encoding="utf-8")
-        if format_key == "table":
+        table = render_table(filtered)
+        if output is not None:
+            output.write_text(render_table_text(table), encoding="utf-8")
             console.print(f"[green]Saved report to[/green] {output}")
+            return
+
+        console.print(table)
         return
 
-    if format_key == "table":
-        console.print(rendered)
+    rendered = to_json(filtered) if format_key == "json" else to_markdown(filtered)
+
+    if output is not None:
+        output.write_text(rendered, encoding="utf-8")
         return
 
     if format_key == "json":
@@ -124,6 +163,14 @@ def render_table(results: list[dict[str, Any]]) -> Table:
         )
 
     return table
+
+
+def render_table_text(table: Table) -> str:
+    """Render a Rich table to plain text for file output."""
+    buffer = StringIO()
+    file_console = Console(file=buffer, force_terminal=False, color_system=None)
+    file_console.print(table)
+    return buffer.getvalue()
 
 
 if __name__ == "__main__":

@@ -133,13 +133,17 @@ def _apply_ai_advice(
 
 
 def _finalize_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    sorted_results = sorted(results, key=lambda row: int(row["risk_score"]), reverse=True)
+    sorted_results = sorted(
+        results, key=lambda row: int(row["risk_score"]), reverse=True
+    )
     for row in sorted_results:
         row["risk_label"] = risk_label(int(row["risk_score"]))
     return sorted_results
 
 
-def _rewrite_cache_dependencies(cache: dict[str, Any], results: list[dict[str, Any]]) -> None:
+def _rewrite_cache_dependencies(
+    cache: dict[str, Any], results: list[dict[str, Any]]
+) -> None:
     """Replace dependency cache with latest run results for current dependency set."""
     cache["dependencies"] = {}
     for dependency in results:

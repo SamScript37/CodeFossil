@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +54,9 @@ def load_package_json(path: Path) -> dict[str, Any]:
             raise PackageJsonError(f"{field} must be an object when present")
 
     if "dependencies" not in payload and "devDependencies" not in payload:
-        raise PackageJsonError("package.json must include dependencies or devDependencies")
+        raise PackageJsonError(
+            "package.json must include dependencies or devDependencies"
+        )
 
     return payload
 
@@ -67,7 +69,9 @@ def collect_dependencies(payload: dict[str, Any], include_dev: bool) -> dict[str
     return {name: str(version) for name, version in dependencies.items()}
 
 
-def scan_npm_dependencies(project_path: Path, include_dev: bool = False) -> list[dict[str, Any]]:
+def scan_npm_dependencies(
+    project_path: Path, include_dev: bool = False
+) -> list[dict[str, Any]]:
     """Scan package.json dependencies and return structured staleness results."""
     payload = load_package_json(project_path / "package.json")
     dependencies = collect_dependencies(payload, include_dev=include_dev)
@@ -106,7 +110,9 @@ def scan_npm_dependencies(project_path: Path, include_dev: bool = False) -> list
     return results
 
 
-def fetch_years_since_latest_release(client: httpx.Client, package: str, now: datetime) -> float:
+def fetch_years_since_latest_release(
+    client: httpx.Client, package: str, now: datetime
+) -> float:
     """Fetch npm metadata and compute years since latest version timestamp."""
     url = f"{NPM_REGISTRY_URL}/{package}"
     try:
@@ -118,7 +124,7 @@ def fetch_years_since_latest_release(client: httpx.Client, package: str, now: da
     data = response.json()
     time_data = data.get("time") or {}
 
-    latest_version = ((data.get("dist-tags") or {}).get("latest"))
+    latest_version = (data.get("dist-tags") or {}).get("latest")
     latest_timestamp = time_data.get(latest_version) if latest_version else None
     if not latest_timestamp:
         latest_timestamp = time_data.get("modified")
@@ -135,7 +141,9 @@ def fetch_years_since_latest_release(client: httpx.Client, package: str, now: da
     return elapsed_days / 365.25
 
 
-def analyze_dependency_versions(dependency_versions: dict[str, str]) -> list[dict[str, Any]]:
+def analyze_dependency_versions(
+    dependency_versions: dict[str, str],
+) -> list[dict[str, Any]]:
     """Analyze a provided dependency map without reading project files."""
     now = datetime.now(tz=UTC)
     results: list[dict[str, Any]] = []

@@ -6,7 +6,6 @@ import json
 
 from codefossil.output.formatter import to_json, to_markdown
 
-
 SAMPLE_RESULTS = [
     {
         "name": "ancient-lib",

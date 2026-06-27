@@ -36,7 +36,11 @@ def to_markdown(results: list[dict[str, Any]]) -> str:
                 f"- Version: {item['version']}",
                 f"- Risk score: {item['risk_score']}",
                 f"- Status: {item.get('risk_label', _risk_label(int(item['risk_score'])))}",
-                *( [f"- AI advice: {item['ai_advice']}"] if item.get('ai_advice') else [] ),
+                *(
+                    [f"- AI advice: {item['ai_advice']}"]
+                    if item.get("ai_advice")
+                    else []
+                ),
                 "",
             ]
         )

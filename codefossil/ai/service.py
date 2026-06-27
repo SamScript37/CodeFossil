@@ -6,7 +6,6 @@ import sys
 from typing import Any
 
 
-
 class AIProviderError(RuntimeError):
     """Raised when an AI provider request fails."""
 
@@ -28,7 +27,10 @@ class OpenAIProvider(BaseProvider):
         body = {
             "model": "gpt-4o-mini",
             "messages": [
-                {"role": "system", "content": "You generate concise migration advice for software dependencies."},
+                {
+                    "role": "system",
+                    "content": "You generate concise migration advice for software dependencies.",
+                },
                 {"role": "user", "content": prompt},
             ],
             "temperature": 0.2,
@@ -36,7 +38,9 @@ class OpenAIProvider(BaseProvider):
         import httpx
 
         with httpx.Client(timeout=20.0) as client:
-            resp = client.post("https://api.openai.com/v1/chat/completions", headers=headers, json=body)
+            resp = client.post(
+                "https://api.openai.com/v1/chat/completions", headers=headers, json=body
+            )
             resp.raise_for_status()
             data = resp.json()
         return str(data["choices"][0]["message"]["content"]).strip()
@@ -57,7 +61,9 @@ class AnthropicProvider(BaseProvider):
         import httpx
 
         with httpx.Client(timeout=20.0) as client:
-            resp = client.post("https://api.anthropic.com/v1/messages", headers=headers, json=body)
+            resp = client.post(
+                "https://api.anthropic.com/v1/messages", headers=headers, json=body
+            )
             resp.raise_for_status()
             data = resp.json()
         return str(data["content"][0]["text"]).strip()
@@ -70,7 +76,10 @@ class GroqProvider(BaseProvider):
         body = {
             "model": "llama-3.1-8b-instant",
             "messages": [
-                {"role": "system", "content": "You generate concise migration advice for software dependencies."},
+                {
+                    "role": "system",
+                    "content": "You generate concise migration advice for software dependencies.",
+                },
                 {"role": "user", "content": prompt},
             ],
             "temperature": 0.2,
@@ -78,7 +87,11 @@ class GroqProvider(BaseProvider):
         import httpx
 
         with httpx.Client(timeout=20.0) as client:
-            resp = client.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=body)
+            resp = client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers=headers,
+                json=body,
+            )
             resp.raise_for_status()
             data = resp.json()
         return str(data["choices"][0]["message"]["content"]).strip()
@@ -117,7 +130,10 @@ def generate_advice_for_dependencies(
         try:
             dep["ai_advice"] = provider.generate_migration_advice(dep)
         except Exception as exc:  # pragma: no cover - network/provider failures
-            print(f"Warning: failed to generate AI advice for {dep.get('name')}: {exc}", file=sys.stderr)
+            print(
+                f"Warning: failed to generate AI advice for {dep.get('name')}: {exc}",
+                file=sys.stderr,
+            )
 
     return deps
 
